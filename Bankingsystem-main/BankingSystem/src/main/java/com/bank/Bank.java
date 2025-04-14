@@ -1,25 +1,28 @@
-import java.util.HashMap;
-import java.util.Map;
+package com.bank;
 
-public class Bank {
-    private Map<Integer, Account> accounts = new HashMap<>();
+public class Main {
+    public static void main(String[] args) {
+        Bank bank = new Bank();
 
-    public void addAccount(Account account) {
-        accounts.put(account.getAccountNumber(), account);
-    }
+        Account acc1 = new Account(1001, "Alice", 5000.0);
+        Account acc2 = new Account(1002, "Bob", 3000.0);
 
-    public boolean transfer(int fromAcc, int toAcc, double amount) {
-        Account sender = accounts.get(fromAcc);
-        Account receiver = accounts.get(toAcc);
+        bank.addAccount(acc1);
+        bank.addAccount(acc2);
 
-        if (sender != null && receiver != null && sender.withdraw(amount)) {
-            receiver.deposit(amount);
-            return true;
+        System.out.println("Initial Balances:");
+        System.out.println("Alice: " + acc1.getBalance());
+        System.out.println("Bob: " + acc2.getBalance());
+
+        System.out.println("\nTransferring 1000 from Alice to Bob...");
+        if (bank.transfer(1001, 1002, 1000.0)) {
+            System.out.println("Transfer successful!");
+        } else {
+            System.out.println("Transfer failed!");
         }
-        return false; // Transfer failed due to invalid accounts or insufficient funds
-    }
 
-    public Account getAccount(int accountNumber) {
-        return accounts.get(accountNumber);
+        System.out.println("\nUpdated Balances:");
+        System.out.println("Alice: " + acc1.getBalance());
+        System.out.println("Bob: " + acc2.getBalance());
     }
 }
