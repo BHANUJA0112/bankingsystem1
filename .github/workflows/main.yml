@@ -25,15 +25,15 @@ jobs:
 
       - name: Build project with Maven
         run: mvn clean package
-        working-directory: BankingSystem
+        working-directory: Bankingsystem-main/BankingSystem
 
       - name: Build Docker image inside Minikube
         run: |
-          minikube image build -t local/banking-system:latest BankingSystem/
+          minikube image build -t local/banking-system:latest Bankingsystem-main/BankingSystem/
 
       - name: Deploy to Minikube
         run: |
-          kubectl apply -f BankingSystem/Deployment.yaml
+          kubectl apply -f Bankingsystem-main/BankingSystem/Deployment.yaml
           kubectl get pods
           kubectl wait --for=condition=ready pod -l app=banking-system --timeout=180s
 
