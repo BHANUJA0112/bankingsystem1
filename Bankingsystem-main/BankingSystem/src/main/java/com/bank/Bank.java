@@ -1,3 +1,5 @@
+package com.bank;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -16,7 +18,7 @@ public class Bank {
             receiver.deposit(amount);
             return true;
         }
-        return false; // Transfer failed due to invalid accounts or insufficient funds
+        return false;
     }
 
     public Account getAccount(int accountNumber) {
