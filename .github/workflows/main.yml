@@ -27,6 +27,8 @@ jobs:
           cache: true
           minikube-version: latest
           wait: all
+          cpus: 2  # Allocate 2 CPUs to Minikube
+          memory: 4096  # Allocate 4 GB of memory to Minikube
 
       - name: 🛠️ Build project with Maven
         run: mvn clean package
@@ -40,11 +42,11 @@ jobs:
         run: |
           kubectl apply -f Bankingsystem-main/BankingSystem/Deployment.yaml
           kubectl get pods
-          kubectl wait --for=condition=ready pod -l app=banking-system --timeout=180s
+          kubectl wait --for=condition=ready pod -l app=banking-system --timeout=300s  # Increased timeout to 5 minutes
 
       - name: 🔍 Show app logs (for debugging)
         run: |
-          kubectl logs -l app=banking-system --all-containers=true
+          kubectl logs -l app=banking-system --all-containers=true --tail=50  # Show the last 50 lines of logs
 
       - name: 🌐 Test Service
         run: |
