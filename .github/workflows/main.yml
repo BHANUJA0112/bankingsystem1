@@ -23,32 +23,21 @@ jobs:
       - name: Start Minikube
         uses: medyagh/setup-minikube@latest
         with:
-          start: true
-          wait: all
-          cache: true
-          minikube-version: latest
+          minikube-version: 'v1.30.0'  # Adjust the version if needed
 
       - name: Build project with Maven
         run: mvn clean package
-        working-directory: Bankingsystem-main/BankingSystem
+        working-directory: BankingSystem
 
       - name: Build Docker image inside Minikube
         run: |
-          minikube image build -t local/banking-system:latest Bankingsystem-main/BankingSystem/
+          minikube image build -t local/banking-system:latest BankingSystem/
 
       - name: Deploy to Minikube
         run: |
-          kubectl apply -f Bankingsystem-main/BankingSystem/Deployment.yaml
+          kubectl apply -f BankingSystem/Deployment.yaml
           kubectl get pods
           kubectl wait --for=condition=ready pod -l app=banking-system --timeout=180s
-
-      - name: Debug Pod Info (on failure)
-        if: failure()
-        run: kubectl describe pod -l app=banking-system
-
-      - name: Debug Pod Logs (on failure)
-        if: failure()
-        run: kubectl logs -l app=banking-system --all-containers=true || echo "No logs available"
 
       - name: Test Service
         run: |
