@@ -11,40 +11,47 @@ jobs:
     name: Build & Deploy BankingSystem on Minikube
 
     steps:
-      - name: Checkout code
+      - name: 📥 Checkout code
         uses: actions/checkout@v4
 
-      - name: Set up JDK 17
+      - name: ☕ Set up JDK 17
         uses: actions/setup-java@v4
         with:
           java-version: '17'
           distribution: 'temurin'
 
-      - name: Start Minikube
+      - name: 🚀 Start Minikube
         uses: medyagh/setup-minikube@latest
         with:
-          minikube-version: 'v1.30.0'  # Adjust the version if needed
+          start: true
+          cache: true
+          minikube-version: latest
+          wait: all
 
-      - name: Build project with Maven
+      - name: 🛠️ Build project with Maven
         run: mvn clean package
-        working-directory: BankingSystem
+        working-directory: Bankingsystem-main/BankingSystem
 
-      - name: Build Docker image inside Minikube
+      - name: 🐳 Build Docker image inside Minikube
         run: |
-          minikube image build -t local/banking-system:latest BankingSystem/
+          minikube image build -t local/banking-system:latest Bankingsystem-main/BankingSystem
 
-      - name: Deploy to Minikube
+      - name: 📦 Deploy to Minikube
         run: |
-          kubectl apply -f BankingSystem/Deployment.yaml
+          kubectl apply -f Bankingsystem-main/BankingSystem/Deployment.yaml
           kubectl get pods
           kubectl wait --for=condition=ready pod -l app=banking-system --timeout=180s
 
-      - name: Test Service
+      - name: 🔍 Show app logs (for debugging)
+        run: |
+          kubectl logs -l app=banking-system --all-containers=true
+
+      - name: 🌐 Test Service
         run: |
           echo "Service URL:"
           minikube service banking-system-svc --url
           echo "Trying curl:"
           curl $(minikube service banking-system-svc --url) || echo "❌ Service may not be ready"
 
-      - name: Done
+      - name: ✅ Done
         run: echo "✅ BankingSystem deployed!"
