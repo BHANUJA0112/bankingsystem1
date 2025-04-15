@@ -1,57 +1,64 @@
-name: CI/CD with Minikube for BankingSystem
+name: Java CI/CD - Banking System
 
 on:
-  pull_request:
   push:
-    branches: [main]
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
 
 jobs:
-  build-deploy:
+  build:
+    name: 🔨 Build with Maven
     runs-on: ubuntu-latest
-    name: Build & Deploy BankingSystem on Minikube
 
     steps:
-      - name: 📥 Checkout code
+      - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: ☕ Set up JDK 17
+      - name: Set up JDK 17
         uses: actions/setup-java@v4
         with:
           java-version: '17'
           distribution: 'temurin'
 
-      - name: 🚀 Start Minikube
-        uses: medyagh/setup-minikube@latest
-        with:
-          start: true
-          cache: true
-          minikube-version: latest
-          wait: all
-
-      - name: 🛠️ Build project with Maven
-        run: mvn clean package
+      - name: Build with Maven
+        run: mvn clean install
         working-directory: Bankingsystem-main/BankingSystem
 
-      - name: 🐳 Build Docker image inside Minikube
-        run: |
-          minikube image build -t local/banking-system:latest Bankingsystem-main/BankingSystem
+  test:
+    name: ✅ Run JUnit Tests
+    needs: build
+    runs-on: ubuntu-latest
 
-      - name: 📦 Deploy to Minikube
-        run: |
-          kubectl apply -f Bankingsystem-main/BankingSystem/Deployment.yaml
-          kubectl get pods
-          kubectl wait --for=condition=ready pod -l app=banking-system --timeout=300s
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-      - name: 🔍 Show app logs (for debugging)
-        run: |
-          kubectl logs -l app=banking-system --all-containers=true
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
 
-      - name: 🌐 Test Service
-        run: |
-          echo "Service URL:"
-          minikube service banking-system-svc --url
-          echo "Trying curl:"
-          curl $(minikube service banking-system-svc --url) || echo "❌ Service may not be ready"
+      - name: Run tests
+        run: mvn test
+        working-directory: Bankingsystem-main/BankingSystem
 
-      - name: ✅ Done
-        run: echo "✅ BankingSystem deployed!"
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results
+          path: Bankingsystem-main/BankingSystem/target/surefire-reports/
+
+  deploy:
+    name: 🚀 Simulate Deployment
+    needs: test
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Simulate Deploy
+        run: echo "✅ Tests passed. Ready to deploy!"
